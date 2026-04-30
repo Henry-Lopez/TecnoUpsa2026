@@ -1,0 +1,25 @@
+package com.aguafutura.platform.core.infrastructure.persistence.jpa;
+
+import com.aguafutura.platform.core.application.port.TenantRepositoryPort;
+import com.aguafutura.platform.core.domain.Tenant;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+@Repository
+public class TenantPersistenceAdapter implements TenantRepositoryPort {
+
+    private final TenantJpaRepository tenantJpaRepository;
+
+    public TenantPersistenceAdapter(TenantJpaRepository tenantJpaRepository) {
+        this.tenantJpaRepository = tenantJpaRepository;
+    }
+
+    @Override
+    public List<Tenant> findAll() {
+        return tenantJpaRepository.findAll()
+                .stream()
+                .map(TenantJpaEntity::toDomain)
+                .toList();
+    }
+}

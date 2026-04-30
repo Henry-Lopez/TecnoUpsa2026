@@ -1,0 +1,36 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: aguafutura-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: aguafutura
+      POSTGRES_USER: aguafutura
+      POSTGRES_PASSWORD: aguafutura123
+    ports:
+      - "5433:5432"
+    volumes:
+      - aguafutura_postgres_data:/var/lib/postgresql/data
+
+  mongodb:
+    image: mongo:7
+    container_name: aguafutura-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - aguafutura_mongo_data:/data/db
+
+  redis:
+    image: redis:7
+    container_name: aguafutura-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - aguafutura_redis_data:/data
+
+volumes:
+  aguafutura_postgres_data:
+  aguafutura_mongo_data:
+  aguafutura_redis_data:

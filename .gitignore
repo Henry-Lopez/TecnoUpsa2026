@@ -1,0 +1,40 @@
+﻿# Java / Spring Boot
+target/
+*.class
+*.jar
+*.war
+*.ear
+
+# Maven
+.mvn/wrapper/maven-wrapper.jar
+
+# IntelliJ IDEA
+.idea/
+*.iml
+out/
+
+# VS Code
+.vscode/
+
+# Logs
+logs/
+*.log
+
+# Environment files
+.env
+.env.*
+application-local.properties
+
+# Node / Frontend / Mobile
+node_modules/
+dist/
+build/
+.expo/
+.expo-shared/
+
+# Docker volumes / temp
+docker/data/
+
+# OS
+.DS_Store
+Thumbs.db
