@@ -192,9 +192,34 @@
 
     <!-- DASHBOARD CARD -->
     <div class="card hidden" id="dashboardCard">
-        <p style="text-align: center; color: var(--success); margin-bottom: 1.5rem; font-weight: 600;">
-            ✅ Conectado exitosamente
-        </p>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <p style="color: var(--success); font-weight: 600; margin: 0;">✅ Conectado exitosamente</p>
+            <button onclick="fetchAnalytics()" style="background: #34d399; color: #0f172a; padding: 0.5rem 1rem; width: auto; font-size: 0.875rem;">📊 Ver Estadísticas</button>
+        </div>
+        
+        <!-- ANALYTICS PANEL -->
+        <div id="analyticsPanel" class="hidden" style="background: rgba(15,23,42,0.8); padding: 1.5rem; border-radius: 1rem; margin-bottom: 1.5rem; border: 1px solid #34d399;">
+            <h3 style="color: #34d399; margin-bottom: 1rem; text-align: center;">Métricas de la Red (En Vivo)</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div style="background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 0.5rem; text-align: center;">
+                    <p style="color: #94a3b8; font-size: 0.75rem; text-transform: uppercase;">Total Medidores</p>
+                    <h2 id="statAssets" style="color: #60a5fa; font-size: 2rem;">0</h2>
+                </div>
+                <div style="background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 0.5rem; text-align: center;">
+                    <p style="color: #94a3b8; font-size: 0.75rem; text-transform: uppercase;">Consumo Total</p>
+                    <h2 id="statConsumption" style="color: #10b981; font-size: 2rem;">0 <span style="font-size: 1rem;">m³</span></h2>
+                </div>
+                <div style="background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 0.5rem; text-align: center;">
+                    <p style="color: #94a3b8; font-size: 0.75rem; text-transform: uppercase;">Fallas Reportadas</p>
+                    <h2 id="statIncidents" style="color: #ef4444; font-size: 2rem;">0</h2>
+                </div>
+                <div style="background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 0.5rem; text-align: center;">
+                    <p style="color: #94a3b8; font-size: 0.75rem; text-transform: uppercase;">Órdenes de Trabajo</p>
+                    <h2 id="statWorkOrders" style="color: #f59e0b; font-size: 2rem;">0</h2>
+                </div>
+            </div>
+            <button onclick="document.getElementById('analyticsPanel').classList.add('hidden')" style="margin-top: 1rem; background: transparent; border: 1px solid #94a3b8; color: #94a3b8;">Cerrar Panel</button>
+        </div>
         
         <div class="form-group">
             <label>1. Selecciona Zona</label>
@@ -647,6 +672,24 @@
             fetchHistory(assetId); // Actualizar tabla
         } catch (e) {
             showAlert(e.message, true);
+        }
+    }
+
+    async function fetchAnalytics() {
+        try {
+            const res = await fetch(`${API_BASE}/analytics/dashboard`, {
+                headers: { 'Authorization': `Bearer ${JWT_TOKEN}` }
+            });
+            const data = await res.json();
+            
+            document.getElementById('statAssets').textContent = data.totalAssets;
+            document.getElementById('statConsumption').innerHTML = `${data.totalConsumptionVolume} <span style="font-size: 1rem;">m³</span>`;
+            document.getElementById('statIncidents').textContent = data.totalIncidents;
+            document.getElementById('statWorkOrders').textContent = data.totalWorkOrders;
+
+            document.getElementById('analyticsPanel').classList.remove('hidden');
+        } catch (e) {
+            showAlert('Error al cargar estadísticas', true);
         }
     }
 
