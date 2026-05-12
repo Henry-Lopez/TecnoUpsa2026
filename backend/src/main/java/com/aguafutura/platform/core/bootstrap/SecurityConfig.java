@@ -43,6 +43,7 @@ public class SecurityConfig {
                                 "/tester.html",
                                 "/api/v1/tenants",
                                 "/api/v1/tenants/**",
+                                "/api/v1/evidence/download/**",
                                 "/actuator/health",
                                 "/actuator/info",
                                 "/actuator/metrics",

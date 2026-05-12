@@ -221,6 +221,17 @@
             <button onclick="createConsumption()" style="background: #10b981;">+ Añadir Consumo</button>
             <button onclick="createIncident()" style="background: #ef4444;">⚠ Reportar Falla</button>
         </div>
+        <div class="flex-row" style="margin-top: 1rem;">
+            <button onclick="createWorkOrder()" style="background: #f59e0b;">🛠 Crear Orden de Trabajo</button>
+        </div>
+
+        <div class="form-group" style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.1);">
+            <label>3. Subir Evidencia (Foto/Documento)</label>
+            <div class="flex-row" style="align-items: center;">
+                <input type="file" id="evidenceFile" accept="image/*, .pdf" style="flex: 1;" />
+                <button onclick="uploadEvidence()" style="flex: 0 0 auto; background: #8b5cf6; padding: 0.875rem 1.5rem;">📷 Subir</button>
+            </div>
+        </div>
     </div>
 
     <!-- HISTORY CARD -->
@@ -237,6 +248,20 @@
         <div>
             <h4 style="color: #ef4444; margin-bottom: 0.5rem;">Fallas Reportadas</h4>
             <ul id="incidentsList" style="list-style: none; font-size: 0.875rem; color: #94a3b8;">
+                <li>Selecciona un medidor...</li>
+            </ul>
+        </div>
+
+        <div>
+            <h4 style="color: #f59e0b; margin-bottom: 0.5rem; margin-top: 1.5rem;">Órdenes de Trabajo</h4>
+            <ul id="workOrdersList" style="list-style: none; font-size: 0.875rem; color: #94a3b8;">
+                <li>Selecciona un medidor...</li>
+            </ul>
+        </div>
+
+        <div>
+            <h4 style="color: #8b5cf6; margin-bottom: 0.5rem; margin-top: 1.5rem;">Evidencia Fotográfica</h4>
+            <ul id="evidenceList" style="list-style: none; font-size: 0.875rem; color: #94a3b8;">
                 <li>Selecciona un medidor...</li>
             </ul>
         </div>
@@ -394,6 +419,39 @@
                 list.innerHTML += `<li style="background: rgba(15,23,42,0.5); padding: 0.75rem; border-radius: 0.5rem; margin-bottom: 0.5rem; color: #f8fafc;">⚠ <span style="color: ${badgeColor}; font-weight: bold;">[${i.severity}]</span> ${i.title} <span style="float: right; opacity: 0.7;">${i.status}</span></li>`;
             });
         } catch(e) { console.error(e); }
+
+        // Fetch work orders
+        try {
+            const res = await fetch(`${API_BASE}/work-orders`, {
+                headers: { 'Authorization': `Bearer ${JWT_TOKEN}` }
+            });
+            const data = await res.json();
+            const list = document.getElementById('workOrdersList');
+            list.innerHTML = '';
+            const filtered = data.filter(w => w.assetId === assetId);
+            if(filtered.length === 0) list.innerHTML = '<li>No hay órdenes de trabajo.</li>';
+            filtered.forEach(w => {
+                let badgeColor = w.status === 'COMPLETED' ? '#10b981' : '#60a5fa';
+                list.innerHTML += `<li style="background: rgba(15,23,42,0.5); padding: 0.75rem; border-radius: 0.5rem; margin-bottom: 0.5rem; color: #f8fafc;">🛠 [${w.priority}] ${w.description} <span style="float: right; color: ${badgeColor}; font-weight: bold;">${w.status}</span></li>`;
+            });
+        } catch(e) { console.error(e); }
+
+        // Fetch evidence
+        try {
+            const res = await fetch(`${API_BASE}/evidence/ASSET/${assetId}`, {
+                headers: { 'Authorization': `Bearer ${JWT_TOKEN}` }
+            });
+            const data = await res.json();
+            const list = document.getElementById('evidenceList');
+            list.innerHTML = '';
+            if(data.length === 0) list.innerHTML = '<li>No hay evidencia subida.</li>';
+            data.forEach(ev => {
+                list.innerHTML += `<li style="background: rgba(15,23,42,0.5); padding: 0.75rem; border-radius: 0.5rem; margin-bottom: 0.5rem; color: #f8fafc; display: flex; justify-content: space-between; align-items: center;">
+                    <span>📎 ${ev.fileName}</span>
+                    <a href="${ev.url}" target="_blank" style="color: #60a5fa; text-decoration: none; font-weight: bold; background: rgba(59, 130, 246, 0.2); padding: 0.25rem 0.75rem; border-radius: 0.25rem;">Ver Foto</a>
+                </li>`;
+            });
+        } catch(e) { console.error(e); }
     }
 
     async function createZone() {
@@ -516,6 +574,76 @@
             
             if (!res.ok) throw new Error('Error al reportar falla');
             showAlert('⚠ Incidente reportado exitosamente!');
+            fetchHistory(assetId); // Actualizar tabla
+        } catch (e) {
+            showAlert(e.message, true);
+        }
+    }
+
+    async function createWorkOrder() {
+        const assetId = document.getElementById('assetSelect').value;
+        if (!assetId) {
+            showAlert('Debes seleccionar un medidor primero', true);
+            return;
+        }
+
+        const desc = prompt("Describe la tarea a realizar (Ej. Reparar fuga):");
+        if (!desc) return;
+
+        try {
+            const res = await fetch(`${API_BASE}/work-orders`, {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${JWT_TOKEN}`
+                },
+                body: JSON.stringify({
+                    assetId: assetId,
+                    incidentId: null,
+                    description: desc,
+                    priority: "HIGH"
+                })
+            });
+            
+            if (!res.ok) throw new Error('Error al crear orden de trabajo');
+            showAlert('🛠 Orden de trabajo creada exitosamente!');
+            fetchHistory(assetId); // Actualizar tabla
+        } catch (e) {
+            showAlert(e.message, true);
+        }
+    }
+
+    async function uploadEvidence() {
+        const assetId = document.getElementById('assetSelect').value;
+        if (!assetId) {
+            showAlert('Debes seleccionar un medidor primero', true);
+            return;
+        }
+
+        const fileInput = document.getElementById('evidenceFile');
+        if (!fileInput.files || fileInput.files.length === 0) {
+            showAlert('Debes seleccionar un archivo primero', true);
+            return;
+        }
+
+        const file = fileInput.files[0];
+        const formData = new FormData();
+        formData.append('referenceType', 'ASSET');
+        formData.append('referenceId', assetId);
+        formData.append('file', file);
+
+        try {
+            const res = await fetch(`${API_BASE}/evidence`, {
+                method: 'POST',
+                headers: { 
+                    'Authorization': `Bearer ${JWT_TOKEN}`
+                },
+                body: formData
+            });
+            
+            if (!res.ok) throw new Error('Error al subir evidencia');
+            showAlert('📷 Evidencia subida exitosamente!');
+            fileInput.value = ''; // Limpiar input
             fetchHistory(assetId); // Actualizar tabla
         } catch (e) {
             showAlert(e.message, true);
