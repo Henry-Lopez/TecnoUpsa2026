@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AguaFutura Tester</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --success: #10b981;
+            --error: #ef4444;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            background-image: radial-gradient(circle at top left, rgba(59, 130, 246, 0.2), transparent 40%),
+                              radial-gradient(circle at bottom right, rgba(16, 185, 129, 0.15), transparent 40%);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+        }
+
+        h1 {
+            text-align: center;
+            font-weight: 800;
+            margin-bottom: 2rem;
+            background: linear-gradient(to right, #60a5fa, #34d399);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border-color);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            margin-bottom: 1.5rem;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 25px 50px -12px rgba(59, 130, 246, 0.2);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border-color);
+            border-radius: 0.75rem;
+            color: var(--text-main);
+            font-size: 1rem;
+            transition: all 0.2s ease;
+            outline: none;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+        }
+
+        select option {
+            background: var(--bg-color);
+            color: var(--text-main);
+        }
+
+        button {
+            width: 100%;
+            padding: 1rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        button:hover {
+            background: var(--primary-hover);
+            transform: scale(1.02);
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        #alert {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            font-size: 0.875rem;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .alert-success { background: rgba(16, 185, 129, 0.2); color: var(--success); border: 1px solid var(--success); }
+        .alert-error { background: rgba(239, 68, 68, 0.2); color: var(--error); border: 1px solid var(--error); }
+        
+        .flex-row {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .flex-row button {
+            flex: 1;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            background: rgba(59, 130, 246, 0.2);
+            color: #60a5fa;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            margin-top: 0.5rem;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>AguaFutura Tester</h1>
+
+    <div id="alert" class="hidden"></div>
+
+    <!-- LOGIN CARD -->
+    <div class="card" id="loginCard">
+        <div class="form-group">
+            <label>Tenant ID (Carga Automática)</label>
+            <select id="tenantSelect">
+                <option value="">Cargando tenants...</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="email" value="hola@gmail.com">
+        </div>
+        <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="password" value="1234">
+        </div>
+        <button onclick="login()">Iniciar Sesión</button>
+    </div>
+
+    <!-- DASHBOARD CARD -->
+    <div class="card hidden" id="dashboardCard">
+        <p style="text-align: center; color: var(--success); margin-bottom: 1.5rem; font-weight: 600;">
+            ✅ Conectado exitosamente
+        </p>
+        
+        <div class="form-group">
+            <label>1. Selecciona Zona</label>
+            <div class="flex-row">
+                <select id="zoneSelect" onchange="fetchAssets()">
+                    <option value="">-- Elige una zona --</option>
+                </select>
+                <button onclick="createZone()" title="Crear nueva zona" style="flex: 0 0 auto; padding: 0.875rem 1.5rem; background: #60a5fa; color: #0f172a; font-weight: 800;">Crear Zona</button>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>2. Selecciona Medidor (Asset)</label>
+            <div class="flex-row">
+                <select id="assetSelect">
+                    <option value="">-- Elige un medidor --</option>
+                </select>
+                <button onclick="createAsset()" title="Crear nuevo medidor" style="flex: 0 0 auto; padding: 0.875rem 1.5rem; background: #60a5fa; color: #0f172a; font-weight: 800;">Crear Medidor</button>
+            </div>
+            <div id="assetIdBadge" class="badge hidden"></div>
+        </div>
+
+        <div class="flex-row">
+            <button onclick="createConsumption()" style="background: #10b981;">+ Añadir Consumo</button>
+            <button onclick="createIncident()" style="background: #ef4444;">⚠ Reportar Falla</button>
+        </div>
+    </div>
+
+    <!-- HISTORY CARD -->
+    <div class="card hidden" id="historyCard">
+        <h3 style="margin-bottom: 1rem; color: #60a5fa;">Historial del Medidor</h3>
+        
+        <div style="margin-bottom: 1.5rem;">
+            <h4 style="color: #10b981; margin-bottom: 0.5rem;">Consumos Registrados</h4>
+            <ul id="consumptionsList" style="list-style: none; font-size: 0.875rem; color: #94a3b8;">
+                <li>Selecciona un medidor...</li>
+            </ul>
+        </div>
+
+        <div>
+            <h4 style="color: #ef4444; margin-bottom: 0.5rem;">Fallas Reportadas</h4>
+            <ul id="incidentsList" style="list-style: none; font-size: 0.875rem; color: #94a3b8;">
+                <li>Selecciona un medidor...</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+    let JWT_TOKEN = '';
+    const API_BASE = '/api/v1';
+
+    function showAlert(msg, isError = false) {
+        const alert = document.getElementById('alert');
+        alert.textContent = msg;
+        alert.className = isError ? 'alert-error' : 'alert-success';
+        setTimeout(() => alert.classList.add('hidden'), 5000);
+    }
+
+    async function fetchTenants() {
+        try {
+            const res = await fetch(`${API_BASE}/tenants`);
+            const data = await res.json();
+            const select = document.getElementById('tenantSelect');
+            select.innerHTML = '';
+            data.forEach(t => {
+                const opt = document.createElement('option');
+                opt.value = t.id;
+                opt.textContent = `${t.name} (${t.code})`;
+                select.appendChild(opt);
+            });
+        } catch (e) {
+            showAlert('Error cargando tenants. ¿Está encendido el servidor?', true);
+        }
+    }
+
+    async function login() {
+        const tenantId = document.getElementById('tenantSelect').value;
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+
+        try {
+            const res = await fetch(`${API_BASE}/auth/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ tenantId, email, password })
+            });
+            
+            if (!res.ok) throw new Error('Credenciales inválidas');
+            
+            const data = await res.json();
+            JWT_TOKEN = data.accessToken;
+            
+            document.getElementById('loginCard').classList.add('hidden');
+            document.getElementById('dashboardCard').classList.remove('hidden');
+            showAlert('Login exitoso!');
+            
+            fetchZones();
+        } catch (e) {
+            showAlert(e.message, true);
+        }
+    }
+
+    async function fetchZones() {
+        try {
+            const res = await fetch(`${API_BASE}/zones`, {
+                headers: { 'Authorization': `Bearer ${JWT_TOKEN}` }
+            });
+            const data = await res.json();
+            const select = document.getElementById('zoneSelect');
+            select.innerHTML = '<option value="">-- Elige una zona --</option>';
+            data.forEach(z => {
+                const opt = document.createElement('option');
+                opt.value = z.id;
+                opt.textContent = z.name;
+                select.appendChild(opt);
+            });
+            
+            // Si no hay zonas, crear una de prueba automáticamente
+            if(data.length === 0) {
+                showAlert('No hay zonas, crea una en Swagger primero', true);
+            }
+        } catch (e) {
+            showAlert('Error cargando zonas', true);
+        }
+    }
+
+    async function fetchAssets() {
+        const zoneId = document.getElementById('zoneSelect').value;
+        if (!zoneId) return;
+
+        try {
+            const res = await fetch(`${API_BASE}/assets`, {
+                headers: { 'Authorization': `Bearer ${JWT_TOKEN}` }
+            });
+            const data = await res.json();
+            
+            const select = document.getElementById('assetSelect');
+            select.innerHTML = '<option value="">-- Elige un medidor --</option>';
+            
+            // Filtrar activos por zona
+            const zoneAssets = data.filter(a => a.zoneId === zoneId);
+            
+            zoneAssets.forEach(a => {
+                const opt = document.createElement('option');
+                opt.value = a.id;
+                opt.textContent = `${a.name} [${a.code}]`;
+                select.appendChild(opt);
+            });
+            
+            // Mostrar ID badge
+            select.addEventListener('change', (e) => {
+                const badge = document.getElementById('assetIdBadge');
+                if(e.target.value) {
+                    badge.textContent = `ID: ${e.target.value}`;
+                    badge.classList.remove('hidden');
+                    document.getElementById('historyCard').classList.remove('hidden');
+                    fetchHistory(e.target.value);
+                } else {
+                    badge.classList.add('hidden');
+                    document.getElementById('historyCard').classList.add('hidden');
+                }
+            });
+            
+        } catch (e) {
+            showAlert('Error cargando medidores', true);
+        }
+    }
+
+    async function fetchHistory(assetId) {
+        // Fetch consumptions
+        try {
+            const res = await fetch(`${API_BASE}/consumptions/asset/${assetId}`, {
+                headers: { 'Authorization': `Bearer ${JWT_TOKEN}` }
+            });
+            const data = await res.json();
+            const list = document.getElementById('consumptionsList');
+            list.innerHTML = '';
+            if(data.length === 0) list.innerHTML = '<li>No hay consumos registrados.</li>';
+            data.forEach(c => {
+                list.innerHTML += `<li style="background: rgba(15,23,42,0.5); padding: 0.75rem; border-radius: 0.5rem; margin-bottom: 0.5rem; color: #f8fafc;">📅 ${new Date(c.readingDate).toLocaleString()} - <b style="color: #10b981; float: right;">${c.value} m³</b></li>`;
+            });
+        } catch(e) { console.error(e); }
+
+        // Fetch incidents
+        try {
+            const res = await fetch(`${API_BASE}/incidents`, {
+                headers: { 'Authorization': `Bearer ${JWT_TOKEN}` }
+            });
+            const data = await res.json();
+            const list = document.getElementById('incidentsList');
+            list.innerHTML = '';
+            const filtered = data.filter(i => i.assetId === assetId);
+            if(filtered.length === 0) list.innerHTML = '<li>No hay fallas reportadas.</li>';
+            filtered.forEach(i => {
+                let badgeColor = i.severity === 'CRITICAL' || i.severity === 'HIGH' ? '#ef4444' : '#f59e0b';
+                list.innerHTML += `<li style="background: rgba(15,23,42,0.5); padding: 0.75rem; border-radius: 0.5rem; margin-bottom: 0.5rem; color: #f8fafc;">⚠ <span style="color: ${badgeColor}; font-weight: bold;">[${i.severity}]</span> ${i.title} <span style="float: right; opacity: 0.7;">${i.status}</span></li>`;
+            });
+        } catch(e) { console.error(e); }
+    }
+
+    async function createZone() {
+        const zoneName = prompt("Ingresa el nombre de la nueva zona:");
+        if (!zoneName) return;
+
+        try {
+            const res = await fetch(`${API_BASE}/zones`, {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${JWT_TOKEN}`
+                },
+                body: JSON.stringify({
+                    code: "ZONA_" + Math.floor(Math.random() * 10000),
+                    name: zoneName,
+                    description: "Zona creada para el examen"
+                })
+            });
+            if (!res.ok) throw new Error('Error al crear zona');
+            showAlert('✅ Zona creada exitosamente!');
+            fetchZones(); // Recargar la lista de zonas
+        } catch (e) {
+            showAlert(e.message, true);
+        }
+    }
+
+    async function createAsset() {
+        const zoneId = document.getElementById('zoneSelect').value;
+        if (!zoneId) {
+            showAlert('Debes seleccionar una zona primero para crearle un medidor', true);
+            return;
+        }
+
+        const assetName = prompt("Ingresa el nombre del medidor:");
+        if (!assetName) return;
+
+        try {
+            const res = await fetch(`${API_BASE}/assets`, {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${JWT_TOKEN}`
+                },
+                body: JSON.stringify({
+                    zoneId: zoneId,
+                    code: "MED_" + Math.floor(Math.random() * 10000),
+                    name: assetName,
+                    type: "METER",
+                    locationDescription: "Instalado desde el tester"
+                })
+            });
+            if (!res.ok) throw new Error('Error al crear medidor');
+            showAlert('✅ Medidor creado exitosamente!');
+            fetchAssets(); // Recargar la lista de medidores
+        } catch (e) {
+            showAlert(e.message, true);
+        }
+    }
+
+    async function createConsumption() {
+        const assetId = document.getElementById('assetSelect').value;
+        if (!assetId) {
+            showAlert('Debes seleccionar un medidor primero', true);
+            return;
+        }
+
+        const valueStr = prompt("Ingresa el valor del consumo en metros cúbicos (ej. 25.5):");
+        if (!valueStr) return;
+        const valueNum = parseFloat(valueStr);
+        if(isNaN(valueNum)) { showAlert("Valor inválido", true); return; }
+
+        try {
+            const res = await fetch(`${API_BASE}/consumptions`, {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${JWT_TOKEN}`
+                },
+                body: JSON.stringify({
+                    assetId: assetId,
+                    readingDate: new Date().toISOString(),
+                    value: valueNum,
+                    unit: "CUBIC_METERS"
+                })
+            });
+            
+            if (!res.ok) throw new Error('Error al registrar consumo');
+            showAlert('💧 Consumo registrado exitosamente!');
+            fetchHistory(assetId); // Actualizar tabla
+        } catch (e) {
+            showAlert(e.message, true);
+        }
+    }
+
+    async function createIncident() {
+        const assetId = document.getElementById('assetSelect').value;
+        if (!assetId) {
+            showAlert('Debes seleccionar un medidor primero', true);
+            return;
+        }
+
+        const desc = prompt("Describe la falla o incidente:");
+        if (!desc) return;
+
+        try {
+            const res = await fetch(`${API_BASE}/incidents`, {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${JWT_TOKEN}`
+                },
+                body: JSON.stringify({
+                    assetId: assetId,
+                    title: "Reporte: " + desc.substring(0, 15) + "...",
+                    description: desc,
+                    severity: "HIGH"
+                })
+            });
+            
+            if (!res.ok) throw new Error('Error al reportar falla');
+            showAlert('⚠ Incidente reportado exitosamente!');
+            fetchHistory(assetId); // Actualizar tabla
+        } catch (e) {
+            showAlert(e.message, true);
+        }
+    }
+
+    // Auto-load tenants on start
+    window.onload = fetchTenants;
+</script>
+</body>
+</html>

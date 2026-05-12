@@ -40,6 +40,7 @@ public class SecurityConfig {
                                 "/api/v1/health",
                                 "/api/v1/ping",
                                 "/api/v1/core/test-error",
+                                "/tester.html",
                                 "/api/v1/tenants",
                                 "/api/v1/tenants/**",
                                 "/actuator/health",

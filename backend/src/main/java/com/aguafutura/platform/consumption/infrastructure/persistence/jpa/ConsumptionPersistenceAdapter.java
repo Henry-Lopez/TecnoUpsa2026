@@ -1,0 +1,52 @@
+package com.aguafutura.platform.consumption.infrastructure.persistence.jpa;
+
+import com.aguafutura.platform.consumption.application.port.ConsumptionRepositoryPort;
+import com.aguafutura.platform.consumption.domain.Consumption;
+import com.aguafutura.platform.consumption.domain.UnitType;
+
+import java.util.List;
+import java.util.UUID;
+
+public class ConsumptionPersistenceAdapter implements ConsumptionRepositoryPort {
+
+    private final ConsumptionJpaRepository repository;
+
+    public ConsumptionPersistenceAdapter(ConsumptionJpaRepository repository) {
+        this.repository = repository;
+    }
+
+    @Override
+    public Consumption save(Consumption consumption) {
+        ConsumptionJpaEntity entity = new ConsumptionJpaEntity(
+                consumption.getId(),
+                consumption.getTenantId(),
+                consumption.getAssetId(),
+                consumption.getReadingDate(),
+                consumption.getValue(),
+                consumption.getUnit().name(),
+                consumption.getCreatedAt()
+        );
+
+        return toDomain(repository.save(entity));
+    }
+
+    @Override
+    public List<Consumption> findByTenantIdAndAssetId(UUID tenantId, UUID assetId) {
+        return repository.findByTenantIdAndAssetId(tenantId, assetId)
+                .stream()
+                .map(this::toDomain)
+                .toList();
+    }
+
+    private Consumption toDomain(ConsumptionJpaEntity entity) {
+        return new Consumption(
+                entity.getId(),
+                entity.getTenantId(),
+                entity.getAssetId(),
+                entity.getReadingDate(),
+                entity.getValue(),
+                UnitType.valueOf(entity.getUnit()),
+                entity.getCreatedAt()
+        );
+    }
+}
