@@ -248,6 +248,7 @@
         </div>
         <div class="flex-row" style="margin-top: 1rem;">
             <button onclick="createWorkOrder()" style="background: #f59e0b;">🛠 Crear Orden de Trabajo</button>
+            <button onclick="analyzeAI()" style="background: linear-gradient(90deg, #ec4899, #8b5cf6); color: white; font-weight: bold; border: none; flex: 1;">🧠 Analizar Consumo con IA</button>
         </div>
 
         <div class="form-group" style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.1);">
@@ -670,6 +671,33 @@
             showAlert('📷 Evidencia subida exitosamente!');
             fileInput.value = ''; // Limpiar input
             fetchHistory(assetId); // Actualizar tabla
+        } catch (e) {
+            showAlert(e.message, true);
+        }
+    }
+
+    async function analyzeAI() {
+        const assetId = document.getElementById('assetSelect').value;
+        if (!assetId) {
+            showAlert('Debes seleccionar un medidor primero', true);
+            return;
+        }
+
+        showAlert('🧠 Analizando datos con Inteligencia Artificial...', false);
+
+        try {
+            const res = await fetch(`${API_BASE}/ai/analyze/${assetId}`, {
+                headers: { 'Authorization': `Bearer ${JWT_TOKEN}` }
+            });
+            if (!res.ok) throw new Error('Error al conectar con la IA');
+            const data = await res.json();
+            
+            let message = `Análisis de IA Completado:\n\n`;
+            message += `Anomalía Detectada: ${data.isAnomaly ? 'SÍ ⚠' : 'NO ✅'}\n`;
+            message += `Análisis: ${data.analysis}\n`;
+            message += `Recomendación: ${data.recommendation}`;
+
+            alert(message);
         } catch (e) {
             showAlert(e.message, true);
         }
